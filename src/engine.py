@@ -5,6 +5,10 @@ from experta import KnowledgeEngine, Rule, Fact, OR
 from src.utils import ask_yes_no
 
 
+# Определяем список возмонжных состояний для фактов
+# Здесь используется Enum (перечесления), так как они позвоняют удобно
+# определять список всевозможных значений в конкретном контексте. Язык
+# Python имее встроенную поддержку для них в модуле enum
 class Checks(Enum):
     INITIAL = auto()
     BLACK_SCREEN_CHECK = auto()
@@ -22,6 +26,8 @@ class Checks(Enum):
     MOTHERBOARD_CHECK = auto()
 
 
+# Данный миксин был создан для того, чтобы вынести все возможные правила для левой ветки дерева правил
+# с помощью этого разделения программа становится более логичной и простой для понимания
 class MonitorShowingBranchMixin:
     @Rule(Fact(Checks.BLACK_SCREEN_CHECK, False))
     def black_screen_no(self):
@@ -54,6 +60,8 @@ class MonitorShowingBranchMixin:
         self.halt()
 
 
+# Данный миксин был создан для того, чтобы вынести все возможные правила для правой ветки дерева правил
+# с помощью этого разделения программа становится более логичной и простой для понимания
 class MonitorBlackBranchMixin:
     @Rule(Fact(Checks.BLACK_SCREEN_CHECK, True))
     def black_screen_yes(self):
@@ -101,6 +109,11 @@ class MonitorBlackBranchMixin:
         self.halt()
 
 
+# Главный класс "движка" для экспертной системы. Она наследуется от KnowledgeEngine класса,
+# который предоставляет функиональность различную функциональность для работыс ЭС. Данный
+# класс содержит правила, по которым будет работать ЭС. Данная ЭС расширяется при помощи добавлений
+# новых правил. Правила добавляются последством создания нового метода и декорированием его при помощи
+# @Rule, куда уже передается предикат для активации правила
 class FixPCRobot(MonitorShowingBranchMixin, MonitorBlackBranchMixin, KnowledgeEngine):
     def _ask_and_declare(self, state):
         self.declare(Fact(state, ask_yes_no()))
